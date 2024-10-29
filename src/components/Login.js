@@ -23,12 +23,14 @@ const Login = () => {
                 email,
                 password
             });
-        
-            // Set success message from response and store the token
-            setSuccess(response.data.message);
-            login(response.data.token); // Store token and dispatch auth change event
-        
-            // Optionally, reset form fields
+
+            const { message, token, userId } = response.data;
+            if (message && token && userId) {
+                login(token, userId); // Store token and dispatch auth change event
+                setSuccess(message);
+            }
+
+            // Reset form fields
             setEmail('');
             setPassword('');
 
@@ -42,7 +44,7 @@ const Login = () => {
     return (
         <>
             <Form onSubmit={handleSubmit}>
-                
+
                 <FloatingLabel
                     controlId="floatingInput"
                     label="Email address"
