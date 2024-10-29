@@ -2,7 +2,9 @@ import React, { useState } from "react";
 import FloatingLabel from 'react-bootstrap/FloatingLabel';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
-import axios from 'axios'; // Make sure to install axios if you haven't
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { login } from "../utils/auth";
 
 const Register = () => {
     const [name, setName] = useState('');
@@ -11,6 +13,7 @@ const Register = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -29,11 +32,27 @@ const Register = () => {
                 email,
                 password
             });
-            setSuccess(response.data.message); // Correctly set the success message            
+            setSuccess(response.data.message);
+
             // Optionally, reset form fields
             setEmail('');
             setPassword('');
             setConfirmPassword('');
+
+            try {
+                const response = await axios.post('http://localhost:5000/api/users/login', {
+                    email,
+                    password
+                });
+
+                setSuccess(response.data.message);
+                login(response.data.token); // Store token and dispatch auth change event
+
+                navigate('/');
+            } catch (error) {
+                console.error(error.response?.data); // Log the specific error message
+                setError(error.response?.data?.error || 'Login failed, please try again.');
+            }
         } catch (error) {
             console.error(error.response?.data); // Log the specific error message
             setError('Registration failed. Please try again: ' + error);

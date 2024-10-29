@@ -2,13 +2,16 @@ import React, { useState } from "react";
 import FloatingLabel from 'react-bootstrap/FloatingLabel';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
-import axios from 'axios'; // Make sure to install axios if you haven't
+import axios from 'axios';
+import { login } from "../utils/auth";
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -20,13 +23,19 @@ const Login = () => {
                 email,
                 password
             });
-            setSuccess(response.data.message); // Correctly set the success message            
+        
+            // Set success message from response and store the token
+            setSuccess(response.data.message);
+            login(response.data.token); // Store token and dispatch auth change event
+        
             // Optionally, reset form fields
             setEmail('');
             setPassword('');
+
+            navigate('/');
         } catch (error) {
             console.error(error.response?.data); // Log the specific error message
-            setError('Login failed, please try again.');
+            setError(error.response?.data?.error || 'Login failed, please try again.');
         }
     };
 

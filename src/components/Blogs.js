@@ -1,10 +1,13 @@
-import React, { useEffect, useState } from "react"; // Ensure proper import
+import React, { useEffect, useState } from "react";
 import Loading from "./Loading";
+import { useNavigate } from "react-router-dom";
+import { isAuthenticated } from "../utils/auth"; // Adjust the path if necessary
 
-const Blogs = () => { // Make sure the component name starts with an uppercase letter
-    const [blogs, setBlogs] = useState([]); // Initialize state for blogs
-    const [loading, setLoading] = useState(true); // Initialize loading state
-    const [error, setError] = useState(null); // Initialize error state
+const Blogs = () => {
+    const [blogs, setBlogs] = useState([]); 
+    const [loading, setLoading] = useState(true); 
+    const [error, setError] = useState(null); 
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchBlogs = async () => {
@@ -14,23 +17,35 @@ const Blogs = () => { // Make sure the component name starts with an uppercase l
                     throw new Error("Failed to fetch blogs");
                 }
                 const data = await response.json();
-                setBlogs(data); // Assuming your API returns an array of blogs
+                setBlogs(data); 
             } catch (err) {
                 setError(err.message);
             } finally {
                 setLoading(false);
             }
-        };
+        };  
 
         fetchBlogs();
     }, []);
 
-    if (loading) return <Loading />; // Loading state
-    if (error) return <div>Error: {error}</div>; // Error state
+    const handleNewBlog = () => {
+        if (isAuthenticated()) {
+            navigate('/new-blog'); // Redirect to blog creation page
+        } else {
+            alert("Please log in to create a blog");
+            navigate('/login');
+        }
+    };
+
+    if (loading) return <Loading />; 
+    if (error) return <div>Error: {error}</div>; 
 
     return (
         <div>
             <h1>Blog List</h1>
+            <button onClick={handleNewBlog} disabled={!isAuthenticated()} style={{ marginBottom: '20px' }}>
+                {isAuthenticated() ? "Create Blog" : "Log in to create a blog"}
+            </button>
             <ul>
                 {blogs.map((blog) => (
                     <li key={blog._id}>
@@ -43,4 +58,4 @@ const Blogs = () => { // Make sure the component name starts with an uppercase l
     );
 };
 
-export default Blogs; // Export the component
+export default Blogs;
